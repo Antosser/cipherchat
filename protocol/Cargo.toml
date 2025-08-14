@@ -1,0 +1,29 @@
+[package]
+name = "protocol"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+
+[dependencies]
+aes-gcm = "0.10.3"
+chrono = "0.4.38"
+color-eyre = "0.6.3"
+ed25519-dalek = { version = "2.1.1", features = ["rand_core", "serde"] }
+generic-array = { version = "0.14.7", features = ["serde"] }
+itertools = "0.14.0"
+rand = "0.8.5"
+serde = { version = "1.0.204", features = ["serde_derive"] }
+serde_json = "1.0.140"
+sha2 = "0.10.8"
+tap = "1.0.1"
+thiserror = "2.0.12"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+x25519-dalek = { version = "2.0.1", features = [
+    "reusable_secrets",
+    "serde",
+    "static_secrets",
+] }
