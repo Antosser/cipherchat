@@ -78,127 +78,122 @@ fn get_receiver_ver_key(
     }
 }
 
-async fn authenticate(
-    outgoing: &mut SplitSink<WebSocketStream<TcpStream>, tungstenite::Message>,
+pub async fn authenticate(
+    outgoing: &mut SplitSink<WebSocketStream<TcpStream>, Message>,
     incoming: &mut SplitStream<WebSocketStream<TcpStream>>,
 ) -> anyhow::Result<ed25519_dalek::VerifyingKey> {
+    // Generate a 32-byte random challenge
     let proxy_random: [u8; 32] = rand::random();
 
-    let msg = Message::Text(Utf8Bytes::from(
-        serde_json::to_string(&proxy_random).context("Failed to serialize random")?,
-    ));
+    // Serialize and send it
+    let msg_text = serde_json::to_string(&proxy_random).context("Failed to serialize random")?;
+    outgoing
+        .send(Message::Text(Utf8Bytes::from(msg_text)))
+        .await
+        .context("Failed to send authentication challenge")?;
 
-    outgoing.send(msg).await.unwrap();
-
-    let packet_raw = incoming
+    // Wait for response
+    let packet_msg = incoming
         .next()
         .await
         .context("Failed to receive packet")?
         .context("Failed to receive packet")?;
 
-    let packet: auth_packet::AuthPacket =
-        serde_json::from_str(if let tungstenite::Message::Text(ref msg) = packet_raw {
-            msg.as_str()
-        } else {
-            bail!("Invalid message type, expected text");
-        })
-        .context("Failed to deserialize packet")?;
+    // Expect a text message
+    let packet_str = if let Message::Text(s) = packet_msg {
+        s
+    } else {
+        bail!("Invalid message type, expected text");
+    };
 
+    // Deserialize
+    let packet: auth_packet::AuthPacket =
+        serde_json::from_str(&packet_str).context("Failed to deserialize AuthPacket")?;
+
+    // Verify packet
     packet
         .verify(&proxy_random)
-        .context("Failed to verify packet")?;
+        .context("Failed to verify AuthPacket")?;
 
     Ok(packet.ver_key)
 }
 
-async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
+pub async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr) {
     println!("Incoming TCP connection from: {addr}");
 
-    let ws_stream = tokio_tungstenite::accept_async(raw_stream)
-        .await
-        .expect("Error during the websocket handshake occurred");
+    let ws_stream = match tokio_tungstenite::accept_async(raw_stream).await {
+        Ok(ws) => ws,
+        Err(e) => {
+            println!("Error during WebSocket handshake: {e:#}");
+            return;
+        }
+    };
     println!("WebSocket connection established: {addr}");
 
-    // Insert the write part of this peer to the peer map.
     let (tx, rx) = unbounded();
-
     let (mut outgoing, mut incoming) = ws_stream.split();
 
     let ver_key = match authenticate(&mut outgoing, &mut incoming).await {
-        Ok(ver_key) => ver_key,
+        Ok(vk) => vk,
         Err(e) => {
-            println!("Failed to authenticate: {e:#}",);
-            outgoing
+            println!("Failed to authenticate: {e:#}");
+            let _ = outgoing
                 .send(Message::Text(Utf8Bytes::from(e.to_string())))
-                .await
-                .unwrap();
-            outgoing.send(Message::Close(None)).await.unwrap();
+                .await;
+            let _ = outgoing.send(Message::Close(None)).await;
             return;
         }
     };
 
-    println!("{} authenticated successfully", &addr);
+    println!("{addr} authenticated successfully");
 
-    if peer_map.lock().unwrap().contains_key(&ver_key) {
-        println!("{} is already connected", &addr);
-        return;
+    {
+        let mut peers = peer_map.lock().expect("peer_map poisoned");
+        if peers.contains_key(&ver_key) {
+            println!("{addr} is already connected");
+            return;
+        }
+        peers.insert(ver_key, tx);
     }
 
-    peer_map.lock().unwrap().insert(ver_key, tx);
-
     let broadcast_incoming = incoming.try_for_each(|msg| {
-        let peers = peer_map.lock().unwrap();
+        let peers = peer_map.lock().expect("peer_map poisoned");
 
         let msg_string = match msg {
-            tungstenite::Message::Text(ref msg) => msg,
-            tungstenite::Message::Close(_) => {
-                return future::ok(());
-            }
+            tungstenite::Message::Text(ref s) => s,
+            tungstenite::Message::Close(_) => return future::ok(()),
             _ => {
                 println!("Invalid message type, expected text");
                 return future::ok(());
             }
         };
 
-        let msg_deserialized = match serde_json::from_str::<protocol::E2EPacket>(msg_string)
-            .context("Failed to parse message as JSON")
-        {
-            Ok(msg) => msg,
+        let msg_deserialized = match serde_json::from_str::<protocol::E2EPacket>(msg_string) {
+            Ok(m) => m,
             Err(e) => {
-                println!("Failed to handle message: {e:#}",);
+                println!("Failed to parse message as JSON: {e:#}");
                 return future::ok(());
             }
         };
 
         let receiver_ver_key = match get_receiver_ver_key(&msg_deserialized, &ver_key) {
-            Ok(receiver_ver_key) => receiver_ver_key,
+            Ok(k) => k,
             Err(e) => {
-                println!("Failed to handle message: {e:#}",);
+                println!("Failed to extract receiver key: {e:#}");
                 return future::ok(());
             }
         };
 
-        // We want to broadcast the message to everyone except ourselves.
-        // let broadcast_recipients = peers
-        //     .iter()
-        //     .filter(|(peer_addr, _)| peer_addr != &&addr)
-        //     .map(|(_, ws_sink)| ws_sink);
-
-        // for recp in broadcast_recipients {
-        //     recp.unbounded_send(msg.clone()).unwrap();
-        // }
-        let kv = match peers
-            .iter()
-            .find(|(other_ver_key, _)| *other_ver_key == &receiver_ver_key)
-        {
+        let recipient = match peers.iter().find(|(k, _)| *k == &receiver_ver_key) {
             Some(kv) => kv,
             None => {
-                println!("{:?} is not connected", &receiver_ver_key);
+                println!("{receiver_ver_key:?} is not connected");
                 return future::ok(());
             }
         };
-        if let Err(e) = kv.1.unbounded_send(msg.clone()) {
-            println!("Failed to broadcast message to {receiver_ver_key:?}: {e:#}",);
+
+        if let Err(e) = recipient.1.unbounded_send(msg.clone()) {
+            println!("Failed to send to {receiver_ver_key:?}: {e:#}");
         }
 
         future::ok(())
@@ -209,26 +204,24 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
     pin_mut!(broadcast_incoming, receive_from_others);
     future::select(broadcast_incoming, receive_from_others).await;
 
-    println!("{} disconnected", &addr);
-    peer_map.lock().unwrap().remove(&ver_key);
+    println!("{addr} disconnected");
+    peer_map.lock().expect("peer_map poisoned").remove(&ver_key);
 }
 
 #[tokio::main]
 async fn main() -> Result<(), IoError> {
-    let addr = env::args()
+    let bind_addr = env::args()
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8080".to_string());
 
-    let state = PeerMap::new(Mutex::new(HashMap::new()));
+    let state = Arc::new(Mutex::new(HashMap::new())); // Replace with PeerMap if needed
 
-    // Create the event loop and TCP listener we'll accept connections on.
-    let try_socket = TcpListener::bind(&addr).await;
-    let listener = try_socket.expect("Failed to bind");
-    println!("Listening on: ws://{addr}");
+    let listener = TcpListener::bind(&bind_addr).await?;
+    println!("Listening on: ws://{bind_addr}");
 
-    // Let's spawn the handling of each connection in a separate task.
-    while let Ok((stream, addr)) = listener.accept().await {
-        tokio::spawn(handle_connection(state.clone(), stream, addr));
+    while let Ok((stream, peer_addr)) = listener.accept().await {
+        let state = Arc::clone(&state);
+        tokio::spawn(handle_connection(state, stream, peer_addr));
     }
 
     Ok(())
