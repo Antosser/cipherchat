@@ -4,5 +4,5 @@ import wasmPack from "vite-plugin-wasm-pack";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), wasmPack("../wasm-crypto")],
+  plugins: [vue(), wasmPack("../frontend-wasm")],
 });
