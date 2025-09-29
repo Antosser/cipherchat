@@ -25,30 +25,25 @@ pub fn send_message(message: String, chat_id: u64) -> Result<String, JsValue> {
             .get_mut(&chat_id)
             .ok_or(JsValue::from_str("chat does not exist"))?;
 
-        let (cipher, other_ver_key, messages) = if let Chat::Encrypted {
+        let (cipher, other_ver_key, messages, prev_id_self) = if let Chat::Encrypted {
             cipher,
             other_ver_key,
             messages,
+            prev_id_self,
+            ..
         } = chat
         {
-            (cipher, other_ver_key, messages)
+            (cipher, other_ver_key, messages, prev_id_self)
         } else {
             return Err(JsValue::from_str("chat is not encrypted"));
         };
 
-        let index = messages
-            .iter()
-            .rev()
-            .find_map(|msg| match msg {
-                Message::ToOther(msg) => Some(msg.id),
-                _ => None,
-            })
-            .unwrap_or(0);
-
         let decrypted_payload = protocol::DecryptedMessagePayload {
-            id: index + 1,
+            id: *prev_id_self + 1,
             content: message,
         };
+
+        *prev_id_self += 1;
 
         let encrypted_packet = protocol::EncryptedMessage::new(
             chat_id,

@@ -10,34 +10,50 @@ pub fn handle_encrypted_message(
     let mut message_updates = Vec::new();
 
     // Borrow chat minimally
-    let (cipher, other_ver_key, messages) = if let Some(chat) = state.chats.get_mut(&packet.id) {
-        if let Chat::Encrypted {
-            cipher,
-            other_ver_key,
-            messages,
-        } = chat
-        {
-            (cipher, other_ver_key, messages)
+    let (cipher, other_ver_key, messages, prev_id_other, prev_id_self) =
+        if let Some(chat) = state.chats.get_mut(&packet.id) {
+            if let Chat::Encrypted {
+                cipher,
+                other_ver_key,
+                messages,
+                prev_id_other,
+                prev_id_self,
+            } = chat
+            {
+                (cipher, other_ver_key, messages, prev_id_other, prev_id_self)
+            } else {
+                message_updates.push(MessageUpdateToFrontend {
+                    chat_id: packet.id.to_string(),
+                    message: Message::System(format!(
+                        "{} attempted to send message but chat not established",
+                        to_hex(&packet.sender_ver_key.to_bytes())
+                    )),
+                });
+                return Ok((message_updates, None));
+            }
         } else {
             message_updates.push(MessageUpdateToFrontend {
                 chat_id: packet.id.to_string(),
                 message: Message::System(format!(
-                    "{} attempted to send message but chat not established",
+                    "{} attempted to send message but chat does not exist",
                     to_hex(&packet.sender_ver_key.to_bytes())
                 )),
             });
             return Ok((message_updates, None));
-        }
-    } else {
+        };
+
+    // Verify id is unique
+    if packet.id == *prev_id_other + 1 {
         message_updates.push(MessageUpdateToFrontend {
             chat_id: packet.id.to_string(),
             message: Message::System(format!(
-                "{} attempted to send message but chat does not exist",
+                "{} allegedly attempted to send duplicate message",
                 to_hex(&packet.sender_ver_key.to_bytes())
             )),
         });
         return Ok((message_updates, None));
-    };
+    }
+    *prev_id_other = packet.id;
 
     // Verify sender key matches the chat peer
     if *other_ver_key != packet.sender_ver_key {

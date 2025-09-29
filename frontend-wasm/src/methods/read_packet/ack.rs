@@ -105,6 +105,8 @@ pub fn handle_ack(
             cipher,
             other_ver_key: packet.server_ver_key,
             messages: Vec::new(),
+            prev_id_other: 0,
+            prev_id_self: 0,
         },
     );
 

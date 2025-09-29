@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::hex::to_hex;
 use crate::{timestamp, Chat, Message, MessageUpdateToFrontend, MyState};
 use aes_gcm::KeyInit;
@@ -87,6 +89,8 @@ pub fn handle_syn(
             cipher,
             other_ver_key: packet.client_ver_key,
             messages: Vec::new(),
+            prev_id_other: 0,
+            prev_id_self: 0,
         },
     );
 

@@ -3,7 +3,10 @@ mod hex;
 mod methods;
 
 pub use methods::*;
-use std::{cell::RefCell, collections::HashMap};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
@@ -46,6 +49,8 @@ enum Chat {
         cipher: aes_gcm::Aes256Gcm,
         other_ver_key: ed25519_dalek::VerifyingKey,
         messages: Vec<Message>,
+        prev_id_other: u64,
+        prev_id_self: u64,
     },
 }
 
