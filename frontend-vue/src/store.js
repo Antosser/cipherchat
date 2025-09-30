@@ -6,7 +6,7 @@ import {
   read_packet,
   init_chat,
   send_message,
-} from "wasm-crypto";
+} from "frontend-wasm";
 
 const WEBSOCKET_URL = "ws://127.0.0.1:8080";
 

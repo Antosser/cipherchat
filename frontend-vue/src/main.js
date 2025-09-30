@@ -9,7 +9,7 @@ import init, {
   init_chat,
   read_packet,
   send_message,
-} from "wasm-crypto";
+} from "frontend-wasm";
 
 init().then(
   () => {
