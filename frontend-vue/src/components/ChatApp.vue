@@ -12,6 +12,7 @@ const importKeyInput = ref("");
 const startChatKeyInput = ref("");
 const isKeyLoaded = ref(false);
 const status = ref("Not connected");
+const sidebarOpen = ref(false);
 
 // Computed from store
 const chats = computed(() => store.getChats());
@@ -113,8 +114,10 @@ const confirmStartChat = async () => {
 <template>
   <div class="chat-container">
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" :class="{ show: sidebarOpen }">
       <div class="app-name">Secure Chat App</div>
+
+      <button class="menu-toggle" @click="sidebarOpen = !sidebarOpen">☰</button>
 
       <div class="chat-list">
         <div
@@ -425,5 +428,150 @@ const confirmStartChat = async () => {
 
 .input-container button:hover {
   background-color: #0d8c6c;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  .chat-container {
+    flex-direction: column;
+    height: 100dvh; /* dynamic viewport height for phones */
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #4d4d4f;
+  }
+
+  .app-name {
+    padding: 0;
+    font-size: 16px;
+    border: none;
+  }
+
+  .chat-list {
+    display: none; /* Hide sidebar chat list on small screens */
+  }
+
+  .crypto-controls {
+    display: none; /* Hide crypto controls unless toggled */
+  }
+
+  .main-area {
+    flex: 1;
+    width: 100%;
+  }
+
+  .messages-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .input-container {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .input-container input {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .chat-list,
+  .crypto-controls {
+    display: none;
+    width: 100%;
+  }
+
+  .sidebar.show .chat-list,
+  .sidebar.show .crypto-controls {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.chat-container {
+  overflow: hidden;
+}
+
+.messages-container {
+  overflow-y: auto;
+  word-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    width: 90%;
+    min-width: unset;
+    padding: 16px;
+  }
+
+  .modal input {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .crypto-controls button,
+  .modal-actions button {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
+.menu-toggle {
+  display: none; /* hidden by default */
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block; /* only show on smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+
+  .app-name {
+    font-size: 16px;
+    padding: 0;
+  }
+
+  .menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+  }
 }
 </style>
