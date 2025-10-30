@@ -213,8 +213,19 @@ const confirmStartChat = async () => {
 </template>
 
 <style scoped>
-/* Existing styles unchanged... */
+/* ==============================
+   Base Elements
+============================== */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
+/* ==============================
+   General Utilities
+============================== */
 .verkey-display {
   margin-top: 10px;
   font-size: 12px;
@@ -228,6 +239,9 @@ const confirmStartChat = async () => {
   color: #10a37f;
 }
 
+/* ==============================
+   Modal
+============================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -278,13 +292,20 @@ const confirmStartChat = async () => {
   background-color: #0d8c6c;
 }
 
+/* ==============================
+   Chat Layout
+============================== */
 .chat-container {
   display: flex;
   width: 100%;
   height: 100vh;
   background-color: #f7f7f8;
+  overflow: hidden;
 }
 
+/* ==============================
+   Sidebar
+============================== */
 .sidebar {
   width: 260px;
   background-color: #202123;
@@ -323,6 +344,9 @@ const confirmStartChat = async () => {
   font-weight: 500;
 }
 
+/* ==============================
+   Crypto Controls
+============================== */
 .crypto-controls {
   padding: 16px;
   border-top: 1px solid #4d4d4f;
@@ -351,12 +375,18 @@ const confirmStartChat = async () => {
   color: #aaa;
 }
 
+/* ==============================
+   Main Area
+============================== */
 .main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* ==============================
+   Messages
+============================== */
 .messages-container {
   flex: 1;
   padding: 24px;
@@ -364,6 +394,7 @@ const confirmStartChat = async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  word-wrap: break-word;
 }
 
 .message {
@@ -394,6 +425,9 @@ const confirmStartChat = async () => {
   border: 1px solid #eee;
 }
 
+/* ==============================
+   Input Area
+============================== */
 .input-container {
   padding: 16px 24px;
   border-top: 1px solid #e5e5e7;
@@ -430,7 +464,23 @@ const confirmStartChat = async () => {
   background-color: #0d8c6c;
 }
 
-/* --- Mobile Responsiveness --- */
+/* ==============================
+   Menu Toggle
+============================== */
+.menu-toggle {
+  display: none; /* hidden by default */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* ==============================
+   Media Queries
+============================== */
+
+/* --- Tablets and smaller --- */
 @media (max-width: 768px) {
   .chat-container {
     flex-direction: column;
@@ -442,8 +492,16 @@ const confirmStartChat = async () => {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
+    padding: 12px 16px;
     border-bottom: 1px solid #4d4d4f;
+    transition: all 0.3s ease;
+  }
+
+  /* When menu is opened, sidebar becomes a column again */
+  .sidebar.show {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
   .app-name {
@@ -452,12 +510,28 @@ const confirmStartChat = async () => {
     border: none;
   }
 
-  .chat-list {
-    display: none; /* Hide sidebar chat list on small screens */
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
   }
 
+  /* Hidden by default when collapsed */
+  .chat-list,
   .crypto-controls {
-    display: none; /* Hide crypto controls unless toggled */
+    display: none;
+    width: 100%;
+  }
+
+  /* Visible when expanded */
+  .sidebar.show .chat-list,
+  .sidebar.show .crypto-controls {
+    display: flex;
+    flex-direction: column;
   }
 
   .main-area {
@@ -480,50 +554,7 @@ const confirmStartChat = async () => {
   }
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .menu-toggle {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    margin-left: auto;
-  }
-
-  .chat-list,
-  .crypto-controls {
-    display: none;
-    width: 100%;
-  }
-
-  .sidebar.show .chat-list,
-  .sidebar.show .crypto-controls {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-.chat-container {
-  overflow: hidden;
-}
-
-.messages-container {
-  overflow-y: auto;
-  word-wrap: break-word;
-}
-
+/* --- Phones (extra small) --- */
 @media (max-width: 480px) {
   .modal {
     width: 90%;
@@ -540,38 +571,6 @@ body {
   .modal-actions button {
     font-size: 13px;
     padding: 8px 12px;
-  }
-}
-
-.menu-toggle {
-  display: none; /* hidden by default */
-}
-
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block; /* only show on smaller screens */
-  }
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-  }
-
-  .app-name {
-    font-size: 16px;
-    padding: 0;
-  }
-
-  .menu-toggle {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
   }
 }
 </style>
