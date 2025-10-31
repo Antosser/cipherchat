@@ -60,7 +60,7 @@ const sendMessage = async () => {
     await store.sendMessage(newMessage.value.trim());
     newMessage.value = "";
   } catch (e) {
-    console.error("Failed to send:", e);
+    alert("Failed to send:", e);
   }
 };
 
@@ -74,7 +74,7 @@ const generateKey = async () => {
     status.value = "Key generated, connected.";
   } catch (e) {
     status.value = "Key generation failed";
-    console.error(e);
+    alert(e);
   }
 };
 
@@ -92,7 +92,7 @@ const confirmImportKey = async () => {
     showImportDialog.value = false;
   } catch (e) {
     status.value = "Key import failed";
-    console.error(e);
+    alert(e);
   }
 };
 
@@ -106,7 +106,7 @@ const confirmStartChat = async () => {
     showStartChatDialog.value = false;
     startChatKeyInput.value = "";
   } catch (e) {
-    console.error("Failed to start chat:", e);
+    alert("Failed to start chat:", e);
   }
 };
 </script>

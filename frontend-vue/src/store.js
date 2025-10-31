@@ -61,10 +61,8 @@ export default {
   async sendMessage(text) {
     console.log("[store] sendMessage:", text);
     if (!this.state.isKeyLoaded || !this.state.currentChatId) {
-      console.error(
-        "[store] Cannot send message: key not loaded or chat not selected"
-      );
-      throw new Error("Key not loaded or chat not selected.");
+      alert("[store] Cannot send message: key not loaded or chat not selected");
+      alert("Key not loaded or chat not selected.");
     }
 
     try {
@@ -78,10 +76,10 @@ export default {
           currentChat.messages.push({ text, type: "sent" });
         }
       } else {
-        console.error("[store] WebSocket not connected");
+        alert("[store] WebSocket not connected");
       }
     } catch (err) {
-      console.error("[store] Failed to send message:", err);
+      alert("[store] Failed to send message:" + err);
     }
   },
 
@@ -95,7 +93,7 @@ export default {
       console.log("[store] Keypair generated:", { priv, pub });
       this._storeKeypair(priv, pub);
     } catch (err) {
-      console.error("[store] Failed to generate key:", err);
+      alert("[store] Failed to generate key: " + err);
     }
   },
 
@@ -109,7 +107,7 @@ export default {
       console.log("[store] Key imported:", { priv, pub });
       this._storeKeypair(priv, pub);
     } catch (err) {
-      console.error("[store] Failed to import key:", err);
+      alert("[store] Failed to import key:" + err);
     }
   },
 
@@ -138,11 +136,11 @@ export default {
         try {
           this.state.websocket.send(packet);
         } catch (err) {
-          console.error("[store] Failed to send initial packet:", err);
+          alert("[store] Failed to send initial packet:" + err);
         }
       }
     } catch (err) {
-      console.error("[store] Failed to start chat:", err);
+      alert("[store] Failed to start chat:" + err);
     }
   },
 
@@ -175,7 +173,7 @@ export default {
             ws.send(proxyResponse);
             this.state.isAuthenticated = true;
           } catch (e) {
-            console.error("[ws] Failed to authenticate:", e);
+            alert("[ws] Failed to authenticate:" + e);
           }
           return;
         }
@@ -191,12 +189,12 @@ export default {
             ws.send(packet);
           }
         } catch (e) {
-          console.error("[ws] Failed to handle packet:", e);
+          alert("[ws] Failed to handle packet:" + e);
         }
       };
 
       ws.onerror = (e) => {
-        console.error("[ws] error:", e);
+        alert("[ws] error:" + e);
       };
 
       ws.onclose = () => {
@@ -205,7 +203,7 @@ export default {
         this.state.isAuthenticated = false;
       };
     } catch (err) {
-      console.error("[store] Failed to connect websocket:", err);
+      alert("[store] Failed to connect websocket:" + err);
     }
   },
 

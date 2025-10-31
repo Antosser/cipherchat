@@ -20,6 +20,6 @@ init().then(
     createApp(App).mount("#app");
   },
   (err) => {
-    console.error(err);
+    alert(err);
   }
 );
