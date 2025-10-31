@@ -221,7 +221,7 @@ export default {
       let chat = this.state.chats.find((c) => c.id === chatId);
       if (!chat) {
         console.log(`[store] Creating new chat ${chatId}`);
-        chat = { id: chatId, name: `Chat ${chatId}`, messages: [] };
+        chat = { id: chatId, name: `Chat ${chatId % 10000n}`, messages: [] };
         this.state.chats.push(chat);
 
         if (!this.state.currentChatId) {
