@@ -221,7 +221,11 @@ export default {
       let chat = this.state.chats.find((c) => c.id === chatId);
       if (!chat) {
         console.log(`[store] Creating new chat ${chatId}`);
-        chat = { id: chatId, name: `Chat ${chatId % 10000n}`, messages: [] };
+        chat = {
+          id: chatId,
+          name: `Chat ${Number(BigInt(chatId) % 10000n)}`,
+          messages: [],
+        };
         this.state.chats.push(chat);
 
         if (!this.state.currentChatId) {
@@ -248,10 +252,10 @@ export default {
     if (typeof message === "string") {
       text = message;
     } else if (message.ToOther) {
-      text = message.ToOther;
+      text = message.ToOther.content;
       type = "sent";
     } else if (message.ToSelf) {
-      text = message.ToSelf;
+      text = message.ToSelf.content;
       type = "received";
     } else if (message.System) {
       text = message.System;
