@@ -235,7 +235,7 @@ async fn main() -> Result<(), IoError> {
 
     let bind_addr = env::args()
         .nth(1)
-        .unwrap_or_else(|| "127.0.0.1:8080".to_string());
+        .unwrap_or_else(|| "0.0.0.0:8080".to_string());
 
     let state = Arc::new(Mutex::new(HashMap::new())); // Replace with PeerMap if needed
 
