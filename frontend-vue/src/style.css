@@ -4,10 +4,390 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 #app {
   height: 100%;
+}
+
+/* ==============================
+   Base Elements
+============================== */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ==============================
+   General Utilities
+============================== */
+.verkey-display {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #ccc;
+  word-break: break-all;
+}
+
+.monospace {
+  font-family: monospace;
+  font-size: 13px;
+  color: #10a37f;
+}
+
+/* ==============================
+   Modal
+============================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  min-width: 300px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 10px 16px;
+  background-color: #10a37f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-actions button:hover {
+  background-color: #0d8c6c;
+}
+
+/* ==============================
+   Chat Layout
+============================== */
+.chat-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background-color: #f7f7f8;
+  overflow: hidden;
+}
+
+/* ==============================
+   Sidebar
+============================== */
+.sidebar {
+  width: 260px;
+  background-color: #202123;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-name {
+  padding: 24px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #4d4d4f;
+}
+
+.identities-list {
+  padding: 10px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.identity-item {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.identity-item:hover {
+  background-color: #2b2c2f;
+}
+
+.identity-item.active {
+  background-color: #343541;
+  font-weight: 500;
+}
+
+/* ==============================
+   Crypto Controls
+============================== */
+.crypto-controls {
+  padding: 16px;
+  border-top: 1px solid #4d4d4f;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-list {
+  padding: 16px;
+  border-top: 1px solid #4d4d4f;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crypto-controls button {
+  padding: 10px 14px;
+  background-color: #10a37f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chat-item {
+  padding: 10px 14px;
+  background-color: #1050a3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.crypto-controls button:hover {
+  background-color: #0d8c6c;
+}
+
+.crypto-controls .status {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* ==============================
+   Main Area
+============================== */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==============================
+   Messages
+============================== */
+.messages-container {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  word-wrap: break-word;
+}
+
+.message {
+  max-width: 80%;
+  padding: 16px 20px;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+.message.sent {
+  background-color: #e7f7ff;
+  align-self: flex-end;
+  border-bottom-right-radius: 0;
+}
+
+.message.received {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  border-bottom-left-radius: 0;
+}
+
+.message.system {
+  background-color: #f9f9f9;
+  align-self: center;
+  font-style: italic;
+  color: #666;
+  font-size: 0.9em;
+  border: 1px solid #eee;
+}
+
+/* ==============================
+   Input Area
+============================== */
+.input-container {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e5e7;
+  display: flex;
+  gap: 12px;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid #e5e5e7;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.input-container input:focus {
+  border-color: #10a37f;
+}
+
+.input-container button {
+  padding: 14px 24px;
+  background-color: #10a37f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.input-container button:hover {
+  background-color: #0d8c6c;
+}
+
+/* ==============================
+   Menu Toggle
+============================== */
+.menu-toggle {
+  display: none; /* hidden by default */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* ==============================
+   Media Queries
+============================== */
+
+/* --- Tablets and smaller --- */
+@media (max-width: 768px) {
+  .chat-container {
+    flex-direction: column;
+    height: 100dvh; /* dynamic viewport height for phones */
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #4d4d4f;
+    transition: all 0.3s ease;
+  }
+
+  /* When menu is opened, sidebar becomes a column again */
+  .sidebar.show {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .app-name {
+    padding: 0;
+    font-size: 16px;
+    border: none;
+  }
+
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  /* Hidden by default when collapsed */
+  .chat-list,
+  .crypto-controls {
+    display: none;
+    width: 100%;
+  }
+
+  /* Visible when expanded */
+  .sidebar.show .chat-list,
+  .sidebar.show .crypto-controls {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-area {
+    flex: 1;
+    width: 100%;
+  }
+
+  .messages-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .input-container {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .input-container input {
+    font-size: 15px;
+  }
+}
+
+/* --- Phones (extra small) --- */
+@media (max-width: 480px) {
+  .modal {
+    width: 90%;
+    min-width: unset;
+    padding: 16px;
+  }
+
+  .modal input {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .crypto-controls button,
+  .modal-actions button {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
 }
