@@ -42,19 +42,6 @@ pub fn handle_encrypted_message(
             return Ok((message_updates, None));
         };
 
-    // Verify id is unique
-    if packet.id == *prev_id_other + 1 {
-        message_updates.push(MessageUpdateToFrontend {
-            chat_id: packet.id.to_string(),
-            message: Message::System(format!(
-                "{} allegedly attempted to send duplicate message",
-                to_hex(&packet.sender_ver_key.to_bytes())
-            )),
-        });
-        return Ok((message_updates, None));
-    }
-    *prev_id_other = packet.id;
-
     // Verify sender key matches the chat peer
     if *other_ver_key != packet.sender_ver_key {
         message_updates.push(MessageUpdateToFrontend {
@@ -82,6 +69,31 @@ pub fn handle_encrypted_message(
             return Ok((message_updates, None));
         }
     };
+
+    // Verify id is unique
+    if message.id < *prev_id_other + 1 {
+        message_updates.push(MessageUpdateToFrontend {
+            chat_id: packet.id.to_string(),
+            message: Message::System(format!(
+                "{} allegedly attempted to send duplicate message",
+                to_hex(&packet.sender_ver_key.to_bytes())
+            )),
+        });
+        return Ok((message_updates, None));
+    }
+
+    if message.id > *prev_id_other + 1 {
+        message_updates.push(MessageUpdateToFrontend {
+            chat_id: packet.id.to_string(),
+            message: Message::System(format!(
+                "{} messages by {} were dropped and may not be recovered. Continuing chat...",
+                message.id - *prev_id_other - 1,
+                to_hex(&packet.sender_ver_key.to_bytes())
+            )),
+        });
+    }
+
+    *prev_id_other = message.id;
 
     messages.push(Message::ToSelf(message.clone()));
     message_updates.push(MessageUpdateToFrontend {
