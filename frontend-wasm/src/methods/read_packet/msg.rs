@@ -10,17 +10,17 @@ pub fn handle_encrypted_message(
     let mut message_updates = Vec::new();
 
     // Borrow chat minimally
-    let (cipher, other_ver_key, messages, prev_id_other, prev_id_self) =
+    let (cipher, other_ver_key, messages, prev_id_other) =
         if let Some(chat) = state.chats.get_mut(&packet.id) {
             if let Chat::Encrypted {
                 cipher,
                 other_ver_key,
                 messages,
                 prev_id_other,
-                prev_id_self,
+                ..
             } = chat
             {
-                (cipher, other_ver_key, messages, prev_id_other, prev_id_self)
+                (cipher, other_ver_key, messages, prev_id_other)
             } else {
                 message_updates.push(MessageUpdateToFrontend {
                     chat_id: packet.id.to_string(),
@@ -48,6 +48,18 @@ pub fn handle_encrypted_message(
             chat_id: packet.id.to_string(),
             message: Message::System(format!(
                 "{} attempted to send message but sender_ver_key mismatch",
+                to_hex(&packet.sender_ver_key.to_bytes())
+            )),
+        });
+        return Ok((message_updates, None));
+    }
+
+    // Check if nonce was not seen yet
+    if !state.seen_nonces.insert(packet.nonce) {
+        message_updates.push(MessageUpdateToFrontend {
+            chat_id: packet.id.to_string(),
+            message: Message::System(format!(
+                "{} attempted to send message with duplicate nonce",
                 to_hex(&packet.sender_ver_key.to_bytes())
             )),
         });

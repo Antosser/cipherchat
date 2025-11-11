@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::hex::to_hex;
 use crate::{timestamp, Chat, Message, MessageUpdateToFrontend, MyState};
 use aes_gcm::KeyInit;

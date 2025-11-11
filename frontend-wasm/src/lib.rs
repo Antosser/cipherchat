@@ -2,6 +2,7 @@ mod auth_packet;
 mod hex;
 mod methods;
 
+use generic_array::{typenum::U12, GenericArray};
 pub use methods::*;
 use std::{
     cell::RefCell,
@@ -33,6 +34,7 @@ struct MyState {
     pub sign_key: Option<ed25519_dalek::SigningKey>,
     pub ver_key: Option<ed25519_dalek::VerifyingKey>,
     pub chats: HashMap<u64, Chat>,
+    pub seen_nonces: HashSet<GenericArray<u8, U12>>,
 }
 
 #[allow(clippy::large_enum_variant)]
