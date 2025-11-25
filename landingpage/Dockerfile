@@ -1,11 +1,7 @@
 FROM node:18-alpine AS builder
-
 RUN npm install -g html-minifier-terser
-
 WORKDIR /build
-
-COPY . .
-
+COPY landingpage/index.html .
 RUN html-minifier-terser index.html \
     --collapse-whitespace \
     --remove-comments \
@@ -15,8 +11,5 @@ RUN html-minifier-terser index.html \
     -o index.min.html
 
 FROM nginx:stable-alpine
-
 COPY --from=builder /build/index.min.html /usr/share/nginx/html/index.html
-
 EXPOSE 80
-
