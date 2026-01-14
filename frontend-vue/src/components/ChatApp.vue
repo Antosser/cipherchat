@@ -195,6 +195,26 @@ const copySignKeyToClipboard = () => {
           <div>Your SignKey:</div>
           <div class="monospace link">Secret! Click to copy</div>
         </div>
+        <div>
+          <!-- Instructions -->
+          <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+              <li>
+                Generate a key pair using the "Generate Key" button or import
+                one using the "Import Key" button.
+              </li>
+              <li>
+                Start a chat by clicking the "Start Chat" button and entering
+                your partner's VerKey.
+              </li>
+              <li>
+                Send messages using the input field and the "Send" button.
+              </li>
+              <li>Click on a chat in the sidebar to switch to it.</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
 
