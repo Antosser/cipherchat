@@ -39,6 +39,11 @@ body {
   color: #10a37f;
 }
 
+.link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* ==============================
    Modal
 ============================== */

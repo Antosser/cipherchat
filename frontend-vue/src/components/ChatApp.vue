@@ -109,6 +109,42 @@ const confirmStartChat = async () => {
     alert("Failed to start chat:", e);
   }
 };
+
+const copyVerKeyToClipboard = () => {
+  if (!ownVerKey.value) {
+    alert("No verification key to copy");
+    return;
+  }
+
+  const verKeyStr = bytesToMacString(ownVerKey.value);
+
+  navigator.clipboard
+    .writeText(verKeyStr)
+    .then(() => {
+      console.log("Verification key copied to clipboard");
+    })
+    .catch((err) => {
+      alert("Failed to copy verification key: " + err);
+    });
+};
+
+const copySignKeyToClipboard = () => {
+  if (!ownSignKey.value) {
+    alert("No signing key to copy");
+    return;
+  }
+
+  const signKeyStr = bytesToMacString(ownSignKey.value);
+
+  navigator.clipboard
+    .writeText(signKeyStr)
+    .then(() => {
+      console.log("Signing key copied to clipboard");
+    })
+    .catch((err) => {
+      alert("Failed to copy signing key: " + err);
+    });
+};
 </script>
 
 <template>
@@ -140,18 +176,24 @@ const confirmStartChat = async () => {
 
         <div class="status">{{ status }}</div>
 
-        <div v-if="isKeyLoaded && ownVerKey" class="verkey-display">
+        <div
+          v-if="isKeyLoaded && ownVerKey"
+          class="verkey-display"
+          @click="copyVerKeyToClipboard()"
+        >
           <div>Your VerKey:</div>
-          <div class="monospace">
+          <div class="monospace link">
             {{ bytesToMacString(ownVerKey) }}
           </div>
         </div>
 
-        <div v-if="isKeyLoaded && ownSignKey" class="verkey-display">
+        <div
+          v-if="isKeyLoaded && ownSignKey"
+          class="verkey-display"
+          @click="copySignKeyToClipboard()"
+        >
           <div>Your SignKey:</div>
-          <div class="monospace">
-            {{ bytesToMacString(ownSignKey) }}
-          </div>
+          <div class="monospace link">Secret! Click to copy</div>
         </div>
       </div>
     </div>
