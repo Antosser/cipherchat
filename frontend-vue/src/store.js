@@ -8,7 +8,8 @@ import {
   send_message,
 } from "frontend-wasm";
 
-const WEBSOCKET_URL = "/ws";
+const WEBSOCKET_URL =
+  location.hostname == "localhost" ? "ws://localhost:8080" : "/ws";
 
 const state = reactive({
   chats: [], // [{ id, name, messages: [] }]
